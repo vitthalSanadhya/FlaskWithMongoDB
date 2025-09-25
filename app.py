@@ -10,7 +10,7 @@ heading = "TODO Reminder with Flask and MongoDB"
 # Replace <db_password> with your actual password and <db_user> with your username
 MONGO_URI = "mongodb+srv://vitthalsanadhya_db_user:Vitthal%402001@flaskappcluster.fjifvmh.mongodb.net/?retryWrites=true&w=majority&appName=FlaskAppCluster"
 client = MongoClient(MONGO_URI)
-db = client.mymongodb
+db = client['Project0']  # use the actual database name
 todos = db.todo
 
 def redirect_url():
