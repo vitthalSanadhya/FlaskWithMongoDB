@@ -1,42 +1,62 @@
 <html>
-	<head>
-		<title>{{t}}</title>
-	</head>
-	<style>	
-		h1{
-			font-family:"Arial Black", Gadget, sans-serif;
-		}
-		body{
-			background-color:white;
-		}
-	</style>
+<head>
+    <title>{{ t }}</title>
+    <style>    
+        h1 {
+            font-family: "Arial Black", Gadget, sans-serif;
+        }
+        body {
+            background-color: white;
+        }
+        table {
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+        td {
+            padding: 5px;
+        }
+    </style>
+</head>
 <body>
-	<h1>{{h}}</h1>
-	<hr>
-	<h3>Update tasks with a reference</h3>
-	<form action="/action3" method="POST">
-	{% for task in tasks %}
-		Unique Object ID : {{ task['_id'] }}<br/>
-	<input type="text" name="_id" value="{{ task['_id'] }}" hidden>
+    <h1>{{ h }}</h1>
+    <hr>
+    <h3>Update Task</h3>
 
-	<table>
-	<tr>
-	<td>Task Name</td><td> : </td><td><input type="text" name="name" value="{{ task['name'] }}" placeholder="{{ task['name'] }}"></td>
-	</tr>
-	<tr>
-	<td>Description</td><td> : </td><td><textarea type="text" name="desc" rows=3 cols=30 placeholder="{{ task['desc'] }}"> {{ task['desc'] }} </textarea></td>
-	</tr>
-	<tr>
-	<td>Date</td><td> : </td><td><input type="text" name="date" value="{{ task['date'] }}" placeholder="{{ task['date'] }}"></td>
-	</tr>
-	<tr>
-	<td>Priority</td><td> : </td><td><input type="text" name="pr" value="{{ task['pr'] }}" placeholder="{{ task['pr'] }}"></td>
-	</tr>
-	</table>
-	{% endfor %}
-		<button type="submit"> Update Task </button>
-		<br/>
-	</form>
-	<a href="/">Return to TaskList</a>
+    <form action="/action3" method="POST">
+        {% for task in tasks %}
+            <p>Unique Object ID: {{ task['_id'] }}</p>
+            <input type="hidden" name="_id" value="{{ task['_id'] }}">
+
+            <table>
+                <tr>
+                    <td>Task Name</td>
+                    <td>:</td>
+                    <td><input type="text" name="name" value="{{ task['name'] }}" required></td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td>:</td>
+                    <td>
+                        <textarea name="desc" rows="3" cols="30" required>{{ task['desc'] }}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Date</td>
+                    <td>:</td>
+                    <td><input type="text" name="date" value="{{ task['date'] }}"></td>
+                </tr>
+                <tr>
+                    <td>Priority</td>
+                    <td>:</td>
+                    <td><input type="text" name="pr" value="{{ task['pr'] }}"></td>
+                </tr>
+            </table>
+        {% endfor %}
+        <br>
+        <button type="submit">Update Task</button>
+    </form>
+
+    <br>
+    <a href="/">Return to Task List</a>
 </body>
 </html>
