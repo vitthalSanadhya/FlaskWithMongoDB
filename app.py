@@ -7,99 +7,110 @@ app = Flask(__name__)
 title = "TODO sample application with Flask and MongoDB"
 heading = "TODO Reminder with Flask and MongoDB"
 
-# Replace <db_password> with your actual password and <db_user> with your username
+# MongoDB connection
 MONGO_URI = "mongodb+srv://vitthalsanadhya_db_user:Vitthal%402001@flaskappcluster.fjifvmh.mongodb.net/?retryWrites=true&w=majority&appName=FlaskAppCluster"
 client = MongoClient(MONGO_URI)
-db = client['Project0']  # use the actual database name
+db = client.mymongodb
 todos = db.todo
 
 def redirect_url():
-    return request.args.get('next') or \
-           request.referrer or \
-           url_for('index')
+    return request.args.get('next') or request.referrer or url_for('index')
 
 @app.route("/list")
-def lists ():
-	#Display the all Tasks
-	todos_l = todos.find()
-	a1="active"
-	return render_template('index.html',a1=a1,todos=todos_l,t=title,h=heading)
+def lists():
+    try:
+        todos_l = todos.find()
+        a1 = "active"
+        return render_template('index.html', a1=a1, todos=todos_l, t=title, h=heading)
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 @app.route("/")
 @app.route("/uncompleted")
-def tasks ():
-	#Display the Uncompleted Tasks
-	todos_l = todos.find({"done":"no"})
-	a2="active"
-	return render_template('index.html',a2=a2,todos=todos_l,t=title,h=heading)
-
+def tasks():
+    try:
+        todos_l = todos.find({"done": "no"})
+        a2 = "active"
+        return render_template('index.html', a2=a2, todos=todos_l, t=title, h=heading)
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 @app.route("/completed")
-def completed ():
-	#Display the Completed Tasks
-	todos_l = todos.find({"done":"yes"})
-	a3="active"
-	return render_template('index.html',a3=a3,todos=todos_l,t=title,h=heading)
+def completed():
+    try:
+        todos_l = todos.find({"done": "yes"})
+        a3 = "active"
+        return render_template('index.html', a3=a3, todos=todos_l, t=title, h=heading)
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 @app.route("/done")
-def done ():
-	#Done-or-not ICON
-	id=request.values.get("_id")
-	task=todos.find({"_id":ObjectId(id)})
-	if(task[0]["done"]=="yes"):
-		todos.update({"_id":ObjectId(id)}, {"$set": {"done":"no"}})
-	else:
-		todos.update({"_id":ObjectId(id)}, {"$set": {"done":"yes"}})
-	redir=redirect_url()	
-
-	return redirect(redir)
+def done():
+    try:
+        id = request.values.get("_id")
+        task = todos.find_one({"_id": ObjectId(id)})
+        if task:
+            new_status = "no" if task["done"] == "yes" else "yes"
+            todos.update_one({"_id": ObjectId(id)}, {"$set": {"done": new_status}})
+        return redirect(redirect_url())
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 @app.route("/action", methods=['POST'])
-def action ():
-	#Adding a Task
-	name=request.values.get("name")
-	desc=request.values.get("desc")
-	date=request.values.get("date")
-	pr=request.values.get("pr")
-	todos.insert({ "name":name, "desc":desc, "date":date, "pr":pr, "done":"no"})
-	return redirect("/list")
+def action():
+    try:
+        name = request.values.get("name") or ""
+        desc = request.values.get("desc") or ""
+        date = request.values.get("date") or ""
+        pr = request.values.get("pr") or ""
+        todos.insert_one({"name": name, "desc": desc, "date": date, "pr": pr, "done": "no"})
+        return redirect("/list")
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 @app.route("/remove")
-def remove ():
-	#Deleting a Task with various references
-	key=request.values.get("_id")
-	todos.remove({"_id":ObjectId(key)})
-	return redirect("/")
+def remove():
+    try:
+        key = request.values.get("_id")
+        todos.delete_one({"_id": ObjectId(key)})
+        return redirect("/")
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 @app.route("/update")
-def update ():
-	id=request.values.get("_id")
-	task=todos.find({"_id":ObjectId(id)})
-	return render_template('update.html',tasks=task,h=heading,t=title)
+def update():
+    try:
+        id = request.values.get("_id")
+        task = todos.find({"_id": ObjectId(id)})
+        return render_template('update.html', tasks=task, h=heading, t=title)
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 @app.route("/action3", methods=['POST'])
-def action3 ():
-	#Updating a Task with various references
-	name=request.values.get("name")
-	desc=request.values.get("desc")
-	date=request.values.get("date")
-	pr=request.values.get("pr")
-	id=request.values.get("_id")
-	todos.update({"_id":ObjectId(id)}, {'$set':{ "name":name, "desc":desc, "date":date, "pr":pr }})
-	return redirect("/")
+def action3():
+    try:
+        name = request.values.get("name") or ""
+        desc = request.values.get("desc") or ""
+        date = request.values.get("date") or ""
+        pr = request.values.get("pr") or ""
+        id = request.values.get("_id")
+        todos.update_one({"_id": ObjectId(id)}, {'$set': {"name": name, "desc": desc, "date": date, "pr": pr}})
+        return redirect("/")
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 @app.route("/search", methods=['GET'])
 def search():
-	#Searching a Task with various references
-
-	key=request.values.get("key")
-	refer=request.values.get("refer")
-	if(key=="_id"):
-		todos_l = todos.find({refer:ObjectId(key)})
-	else:
-		todos_l = todos.find({refer:key})
-	return render_template('searchlist.html',todos=todos_l,t=title,h=heading)
+    try:
+        key = request.values.get("key")
+        refer = request.values.get("refer")
+        if key == "_id":
+            todos_l = todos.find({refer: ObjectId(key)})
+        else:
+            todos_l = todos.find({refer: key})
+        return render_template('searchlist.html', todos=todos_l, t=title, h=heading)
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 if __name__ == "__main__":
-	
-	app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=5000, debug=True)  # debug=True for now to see full errors
